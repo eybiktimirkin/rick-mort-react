@@ -1,16 +1,27 @@
 import { useState, useEffect } from "react";
 
-export default function useFetch(url) {
-  const [data, setData] = useState(null);
+type FetchError = Error & {
+  status?: number
+}
+
+export default function useFetch<T>(url: string | null) {
+  const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<FetchError | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
   function refetch() {
     setRetryCount((prev) => prev + 1);
   }
 
-  useEffect(() => {
+  useEffect(() => { 
+
+    if(!url) {
+     setIsLoading(false);
+     setData(null)
+     setError(null);
+     return
+    }
     const controller = new AbortController();
     setIsLoading(true);
     setError(null);
@@ -20,18 +31,21 @@ export default function useFetch(url) {
     })
       .then((response) => {
         if (!response.ok) {
-          const error = new Error(`Ошибка HTTP: ${response.status}`);
+          const error: FetchError = new Error(`Ошибка HTTP: ${response.status}`);
           error.status = response.status;
           throw error;
         }
 
         return response.json();
       })
-      .then((result) => {
+      .then((result: T) => {
         setData(result);
       })
-      .catch((error) => {
-        if (error.name !== "AbortError") {
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return
+        }
+         if(error instanceof Error) {
           setError(error);
         }
       })

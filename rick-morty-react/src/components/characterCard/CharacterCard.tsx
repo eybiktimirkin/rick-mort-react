@@ -1,8 +1,13 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import type { Character } from "../../types/character";
 import "./CharacterCard.css";
 
-function CharacterCard(props) {
+type CharacterCardProps = {
+  character: Character;
+};
+
+function CharacterCard(props: CharacterCardProps) {
   const statusClass =
     props.character.status === "Alive"
       ? "alive"
@@ -11,7 +16,7 @@ function CharacterCard(props) {
         : "unknown";
 
   return (
-    <Link to={`/character/${props.character.id}`}>
+    <Link className="character-card" to={`/character/${props.character.id}`}>
       <img src={props.character.image} alt={props.character.name} />
       <h2>{props.character.name}</h2>
       <h3 className={statusClass}>{props.character.status}</h3>

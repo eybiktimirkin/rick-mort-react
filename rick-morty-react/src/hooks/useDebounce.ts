@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function useDebounce(value, delay) {
+export default function useDebounce<T>(value: T, delay: number) {
   const [debouncedSearch, setDebouncedSearch] = useState(value);
 
   useEffect(() => {

@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import CharacterCard from "../components/characterCard/CharacterCard.jsx";
 import useFetch from "../hooks/useFetch.js";
-import useDebounce from "../hooks/useDebounce.js";
-import Loader from "../components/Loader.jsx";
+import useDebounce from "../hooks/useDebounce";
+import Loader from "../components/Loader";
+import type { ApiResponse } from "../types/api";
+import type { Character } from "../types/character";
 
 export default function CharactersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,15 +24,17 @@ export default function CharactersPage() {
 
   const url = `https://rickandmortyapi.com/api/character?${params.toString()}`;
 
-  const { data, isLoading, error, refetch } = useFetch(url);
+  const { data, isLoading, error, refetch } =
+    useFetch<ApiResponse<Character[]>>(url);
 
   useEffect(() => {
-    let params = {};
+    const params = new URLSearchParams();
+
     if (debouncedSearch) {
-      params.name = debouncedSearch;
+      params.set("name", debouncedSearch);
     }
     if (status !== "all") {
-      params.status = status;
+      params.set("status", status);
     }
     setSearchParams(params);
   }, [debouncedSearch, status, setSearchParams]);
@@ -45,6 +49,9 @@ export default function CharactersPage() {
         <button onClick={refetch}>Попробовать снова</button>
       </div>
     );
+  }
+  if (!data) {
+    return <p>Не удалось получить данные</p>;
   }
 
   return (
